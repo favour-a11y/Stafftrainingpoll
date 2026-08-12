@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which trainings would help you most?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F6F0;
+    --paper-raised:#FFFEFB;
+    --ink:#1E2A22;
+    --ink-soft:#5B6B60;
+    --teal:#2F6F62;
+    --teal-dark:#1F4E44;
+    --teal-wash:#E4EEEA;
+    --clay:#C3714B;
+    --line:#DBD6C7;
+    --radius:12px;
+  }
+  *{ box-sizing:border-box; }
+  html, body{ margin:0; padding:0; background:var(--paper); }
+  body{
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    line-height:1.5;
+  }
+  #poll-root{ max-width:600px; margin:0 auto; padding:40px 20px 56px; }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--teal-dark); margin:0 0 10px;
+  }
+  .header-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:22px; }
+  h1{
+    font-family:'Newsreader', Georgia, serif; font-weight:600;
+    font-size:clamp(22px,5vw,30px); line-height:1.15; margin:0 0 8px; max-width:22ch;
+  }
+  .sub{ color:var(--ink-soft); font-size:14.5px; max-width:44ch; margin:0; }
+  .stamp{
+    flex:0 0 auto; font-family:'IBM Plex Mono', monospace; font-size:11px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--clay);
+    border:2px solid var(--clay); border-radius:6px; padding:8px 10px;
+    text-align:center; line-height:1.35; transform:rotate(-4deg); white-space:nowrap;
+  }
+  .stamp b{ display:block; font-size:13px; }
+  @media (max-width:480px){
+    .header-row{ flex-direction:column; }
+    .stamp{ align-self:flex-start; transform:rotate(-2deg); }
+  }
+
+  .card{ background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:26px 22px; }
+  .card h2{ font-family:'Newsreader', Georgia, serif; font-weight:600; font-size:20px; margin:0 0 4px; }
+  .card .role-note{ color:var(--ink-soft); font-size:13px; margin:0 0 18px; }
+
+  .privacy-note{
+    display:flex; gap:8px; align-items:flex-start; background:var(--teal-wash);
+    border-radius:8px; padding:10px 12px; font-size:12.5px; color:var(--teal-dark); margin:16px 0 4px;
+  }
+
+  select#role-select{
+    width:100%; font-family:'IBM Plex Sans', sans-serif; font-size:15px; color:var(--ink);
+    background:transparent; border:none; border-bottom:2px solid var(--line);
+    padding:10px 2px; margin:6px 0 4px; cursor:pointer; appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235B6B60' stroke-width='2' fill='none' fill-rule='evenodd'/></svg>");
+    background-repeat:no-repeat; background-position:right 4px center;
+  }
+  select#role-select:focus{ outline:none; border-bottom-color:var(--teal); }
+
+  .check-item{ display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px dashed var(--line); cursor:pointer; }
+  .check-item:last-of-type{ border-bottom:none; }
+  .check-item input[type="checkbox"]{
+    appearance:none; -webkit-appearance:none; width:20px; height:20px; flex:0 0 auto; margin-top:1px;
+    border:2px solid var(--ink-soft); border-radius:5px; display:grid; place-content:center; cursor:pointer;
+    transition:background .12s ease, border-color .12s ease;
+  }
+  .check-item input[type="checkbox"]::after{
+    content:""; width:10px; height:6px; border-left:2px solid white; border-bottom:2px solid white;
+    transform:rotate(-45deg) scale(0); transition:transform .12s ease;
+  }
+  .check-item input[type="checkbox"]:checked{ background:var(--teal); border-color:var(--teal); }
+  .check-item input[type="checkbox"]:checked::after{ transform:rotate(-45deg) scale(1); }
+  .check-item input[type="checkbox"]:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+  .check-item span{ font-size:14.5px; }
+
+  .field{ margin-top:18px; }
+  .field label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-soft); margin-bottom:6px;
+  }
+  .field input[type="text"], .field textarea{
+    width:100%; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color:var(--ink);
+    background:transparent; border:none; border-bottom:1px solid var(--line); padding:6px 2px; resize:vertical;
+  }
+  .field textarea{ min-height:44px; }
+  .field input[type="text"]:focus, .field textarea:focus{ outline:none; border-bottom:1px solid var(--teal); }
+
+  .actions{ display:flex; align-items:center; gap:14px; margin-top:22px; flex-wrap:wrap; }
+  .btn-primary{
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:14px; color:white;
+    background:var(--teal); border:none; border-radius:8px; padding:12px 22px; cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .btn-primary:hover{ background:var(--teal-dark); }
+  .btn-primary:active{ transform:scale(.98); }
+  .btn-primary:focus-visible{ outline:2px solid var(--teal-dark); outline-offset:2px; }
+  .btn-primary:disabled{ opacity:.6; cursor:default; }
+
+  .validation{ color:var(--clay); font-size:13px; margin-top:10px; min-height:16px; }
+
+  .confirm{ text-align:center; padding:12px 0 4px; }
+  .confirm .mark{
+    width:44px; height:44px; border-radius:50%; background:var(--teal-wash); color:var(--teal-dark);
+    display:grid; place-content:center; margin:0 auto 14px; font-size:20px;
+  }
+  .confirm h2{ margin-bottom:6px; }
+  .confirm p{ color:var(--ink-soft); font-size:14px; margin:0 0 18px; }
+
+  .fade-in{ animation:fadeIn .22s ease; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion:reduce){
+    .fade-in{ animation:none; }
+    .btn-primary{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div id="poll-root">
+  <p class="eyebrow">Staff training intake</p>
+  <div class="header-row">
+    <div>
+      <h1>Which trainings would help you most?</h1>
+      <p class="sub">Pick your role, then check anything you'd like the team to run. Takes under a minute.</p>
+    </div>
+    <div class="stamp">Respond by<b>Sat, Aug 15</b></div>
+  </div>
+  <div id="card-mount"></div>
+</div>
+
+<script>
+(function(){
+  // ⚠️ Replace this with your own Formspree endpoint before publishing —
+  // create a form at https://formspree.io and paste its URL here.
+  var FORMSPREE_URL = "https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID";
+
+  var ROLES = [
+    { id: 'skin', tab: 'Skin Specialist / Aesthetician', heading: 'Advanced skin analysis & treatment',
+      trainings: [
+        'Advanced skin analysis and building custom treatment plans, especially for skin of colour (hyperpigmentation, keloid risk)',
+        'New treatments, devices, and injectable techniques you offer',
+        'Client consultation skills — setting expectations and post-treatment care',
+        'Using AI as a clinical assistant (e.g. drafting aftercare notes, looking up product/ingredient info quickly)'
+      ]},
+    { id: 'admin', tab: 'Admin / Admin Assistant', heading: 'Admin / Admin Assistant',
+      trainings: [
+        'Booking and CRM systems — reducing no-shows, managing records',
+        'Using AI to draft emails, organise schedules, and clean up spreadsheets',
+        'Basic bookkeeping/invoicing and keeping the price list accurate',
+        'Data entry and client record confidentiality/handling'
+      ]},
+    { id: 'pa', tab: 'Personal Assistant', heading: 'Personal Assistant',
+      trainings: [
+        'Calendar and inbox management for a busy executive',
+        'Using AI to draft messages, summarise long emails, and prep briefs',
+        'Task and project tracking — keeping things from slipping',
+        'Professional communication and discretion/confidentiality'
+      ]},
+    { id: 'ops', tab: 'Operations Manager', heading: 'Operations Manager',
+      trainings: [
+        'Team scheduling, rostering, and workflow management',
+        'Inventory and supplier management for products/consumables',
+        'Using AI for reporting — pulling revenue, top services, and targets into simple summaries',
+        'Reading business numbers and setting/tracking team goals'
+      ]},
+    { id: 'medical', tab: 'Medical Director', heading: 'Medical Director',
+      trainings: [
+        'Latest clinical standards and safety protocols for aesthetic procedures',
+        'Regulatory/compliance requirements for a Lagos medspa',
+        'Clinical governance — protocols, incident handling, staff oversight',
+        'Using AI for clinical documentation and staying current on research (with human verification)'
+      ]},
+    { id: 'front', tab: 'Front Desk', heading: 'Front Desk',
+      trainings: [
+        'Using AI to answer client questions about your services accurately (product/treatment knowledge on demand)',
+        'Handling DMs and phone enquiries that convert into bookings',
+        'De-escalating anxious or unhappy clients and service recovery',
+        'Booking system and calendar management to reduce no-shows'
+      ]},
+    { id: 'clean', tab: 'Cleaner', heading: 'Cleaners',
+      trainings: [
+        'Hygiene, sanitation, and infection-control standards for a medical/aesthetic setting',
+        'Safe handling and storage of cleaning chemicals and clinical waste',
+        'Room turnover between clients — checklist and timing',
+        'Health and safety basics (spills, equipment, reporting hazards)'
+      ]}
+  ];
+
+  var mount = document.getElementById('card-mount');
+  var currentRoleId = null;
+
+  function esc(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function renderRoleSelect(){
+    var options = '<option value="" disabled selected>Choose your role…</option>' +
+      ROLES.map(function(r){ return '<option value="' + r.id + '">' + esc(r.tab) + '</option>'; }).join('');
+
+    mount.innerHTML =
+      '<div class="card fade-in">' +
+        '<h2>Who\'s filling this out?</h2>' +
+        '<p class="role-note">Choose the role that\'s actually yours — you\'ll only see your own questions, and you won\'t get the chance to switch to a different role once you continue.</p>' +
+        '<select id="role-select">' + options + '</select>' +
+        '<div class="actions"><button class="btn-primary" id="continue-btn" type="button">Continue</button></div>' +
+        '<p class="validation" id="select-validation" aria-live="polite"></p>' +
+        '<div class="privacy-note">🔒 Your answers go straight to management. Teammates can\'t see anyone else\'s responses.</div>' +
+      '</div>';
+
+    document.getElementById('continue-btn').addEventListener('click', function(){
+      var val = document.getElementById('role-select').value;
+      if (!val){
+        document.getElementById('select-validation').textContent = 'Please choose a role to continue.';
+        return;
+      }
+      currentRoleId = val;
+      renderForm();
+    });
+  }
+
+  function renderForm(){
+    var role = ROLES.filter(function(r){ return r.id === currentRoleId; })[0];
+    var itemsHtml = role.trainings.map(function(t, i){
+      return '<label class="check-item"><input type="checkbox" data-idx="' + i + '"><span>' + esc(t) + '</span></label>';
+    }).join('');
+
+    mount.innerHTML =
+      '<div class="card fade-in">' +
+        '<h2>' + esc(role.heading) + '</h2>' +
+        '<p class="role-note">Check anything you\'d find useful — pick as many as apply, or none if you\'d rather just leave a note.</p>' +
+        itemsHtml +
+        '<div class="field"><label for="other-input">Anything else you\'d like training on?</label>' +
+          '<textarea id="other-input" placeholder="Optional"></textarea></div>' +
+        '<div class="field"><label for="name-input">Your name *</label>' +
+          '<input type="text" id="name-input" placeholder="Required — so we can follow up with you"></div>' +
+        '<div class="actions"><button class="btn-primary" id="submit-btn" type="button">Submit response</button></div>' +
+        '<p class="validation" id="validation-msg" aria-live="polite"></p>' +
+      '</div>';
+
+    document.getElementById('submit-btn').addEventListener('click', function(){ submitResponse(role); });
+  }
+
+  function submitResponse(role){
+    var checked = Array.prototype.slice.call(mount.querySelectorAll('input[type="checkbox"]:checked'))
+      .map(function(cb){ return role.trainings[parseInt(cb.getAttribute('data-idx'), 10)]; });
+    var otherText = mount.querySelector('#other-input').value.trim();
+    var name = mount.querySelector('#name-input').value.trim();
+    var msgEl = document.getElementById('validation-msg');
+
+    if (!name){
+      msgEl.textContent = 'Please enter your name so we can follow up with you.';
+      return;
+    }
+    if (checked.length === 0 && !otherText){
+      msgEl.textContent = 'Pick at least one training, or add a note below.';
+      return;
+    }
+    msgEl.textContent = '';
+
+    var submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    var payload = {
+      name: name,
+      role: role.heading,
+      trainings_selected: checked.length ? checked.join(' | ') : '(none selected)',
+      additional_notes: otherText || '(none)',
+      _subject: 'New training poll response — ' + role.heading
+    };
+
+    fetch(FORMSPREE_URL, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(res){
+      if (!res.ok) throw new Error('Submission failed');
+      renderConfirm(role);
+    }).catch(function(){
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit response';
+      msgEl.textContent = 'Could not send your response — please check your connection and try again.';
+    });
+  }
+
+  function renderConfirm(role){
+    mount.innerHTML =
+      '<div class="card fade-in confirm">' +
+        '<div class="mark">✓</div>' +
+        '<h2>Thanks — recorded!</h2>' +
+        '<p>Your training picks for ' + esc(role.heading) + ' are in.</p>' +
+      '</div>';
+  }
+
+  renderRoleSelect();
+})();
+</script>
+</body>
+</html>
